@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SchoolUp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Figtree:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: dark stage, one big hero phone that cycles real screens, a school-day ticker, three feature rows (one is a live ID maker), then a WhatsApp CTA. */
+:root{
+  --bg:#05070a; --surface:#0e131c; --line:#232c3c; --text:#eef2f9; --muted:#9fb0c8;
+  --blue:#2b9bff; --violet:#7a6bff; --mint:#2bd48a; --amber:#ffb84d; --coral:#ff6b6b;
+  --grad:linear-gradient(90deg,#2b9bff,#7a6bff);
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif;
+  --body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:18px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 96px;overflow-x:hidden}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.025em;line-height:1}
+p{margin:0}
+a{color:inherit}
+.g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:8px}
+
+/* glow */
+.glow{position:fixed;left:50%;top:-10vh;width:min(1100px,140vw);height:900px;transform:translateX(-50%);pointer-events:none;z-index:0;
+  background:radial-gradient(closest-side,rgba(43,155,255,.20),rgba(122,107,255,.09) 55%,rgba(5,7,10,0))}
+main,header,footer{position:relative;z-index:1}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:20px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:11px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;border:0;font:600 17px/1 var(--body);text-decoration:none;cursor:pointer;color:#04101f;background:var(--grad);transition:transform .18s,box-shadow .18s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(70,130,255,.45)}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid #34405a}
+.btn.ghost:hover{box-shadow:none;border-color:var(--blue)}
+.btn.sm{min-height:44px;padding:0 20px;font-size:15px}
+
+/* hero */
+.hero{display:grid;gap:40px;align-items:center;padding-block:28px 56px}
+.hero h1{font-size:clamp(46px,12vw,84px);font-weight:800}
+.hero .sub{font-size:clamp(18px,2.4vw,22px);color:var(--muted);max-width:30em;margin-top:24px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.pill{padding:9px 16px;border-radius:999px;border:1.5px solid #2a3547;font-size:15px;font-weight:600;color:#dbe3f0}
+.pill.dash{border-style:dashed;border-color:#5b6bff;color:#aab4ff}
+.stage{position:relative;display:flex;justify-content:center;perspective:1200px;min-height:560px}
+.phone{position:relative;width:min(300px,74vw);padding:9px;border-radius:50px;background:#10151d;border:1.5px solid #34405a;box-shadow:0 50px 100px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.03);transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform}
+.screen{position:relative;aspect-ratio:1170/2400;border-radius:42px;overflow:hidden;background:#000}
+.screen img{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .7s}
+.screen img.on{opacity:1}
+.dots{position:absolute;bottom:-34px;left:0;right:0;display:flex;justify-content:center;gap:8px}
+.dots button{width:30px;height:6px;border-radius:6px;border:0;padding:0;background:#2a3547;cursor:pointer}
+.dots button[aria-current=true]{background:var(--blue)}
+.float{position:absolute;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:rgba(14,19,28,.92);border:1.5px solid #2a3547;font-size:15px;font-weight:600;white-space:nowrap;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:bob 5s ease-in-out infinite}
+.float i{width:12px;height:12px;border-radius:50%;background:var(--mint);flex:none}
+.f1{left:-70px;top:90px}.f2{right:-40px;top:330px;animation-delay:-1.6s}.f3{left:-50px;bottom:110px;animation-delay:-3s}
+.f2 i{background:var(--blue)}.f3 i{background:var(--violet)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media(max-width:860px){.f1{left:-4px;top:40px}.f2{right:-4px;top:250px}.f3{display:none}.float{font-size:13px;padding:10px 14px}}
+@media(min-width:861px){.hero{grid-template-columns:1.15fr .85fr;padding-block:48px 80px}}
+
+/* ticker */
+.ticker{border-block:1.5px solid var(--line);overflow:hidden;background:rgba(14,19,28,.6);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+.track{display:flex;width:max-content;animation:run 38s linear infinite}
+.track span{display:flex;align-items:center;gap:14px;padding:18px 18px;font-family:var(--mono);font-size:15px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;color:var(--muted)}
+.track b{font-weight:500;color:var(--text);padding:6px 12px;border-radius:8px;background:#151c29;border:1.5px solid #263148}
+.track em{font-style:normal;color:var(--amber);padding:6px 12px;border-radius:8px;border:1.5px dashed #5a4a22}
+.track u{text-decoration:none;color:#3a475f}
+@keyframes run{to{transform:translateX(-50%)}}
+
+/* sections */
+section{padding-block:88px 0}
+.head{display:grid;gap:14px;margin-bottom:44px;max-width:20em}
+.head h2{font-size:clamp(36px,7vw,64px);font-weight:800}
+.row{display:grid;gap:36px;align-items:center;margin-bottom:96px}
+.row .copy{display:grid;gap:18px;align-content:center}
+.row h3{font-size:clamp(32px,5.4vw,52px);font-weight:800}
+.row p.lead{color:var(--muted);max-width:28em}
+.ticks{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}
+.ticks li{display:flex;gap:12px;align-items:flex-start;font-weight:600}
+.ticks li::before{content:"";flex:none;width:20px;height:20px;margin-top:3px;border-radius:50%;background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%2304101f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/20px no-repeat}
+.showcase{display:flex;justify-content:center}
+.showcase .phone{width:min(280px,72vw)}
+.tilt-l{transform:rotate(-4deg)}.tilt-r{transform:rotate(4deg)}
+@media(min-width:861px){.row{grid-template-columns:1fr 1fr}.row.flip .copy{order:2}}
+
+/* id maker */
+.idbox{background:var(--surface);border:1.5px solid var(--line);border-radius:28px;padding:28px;display:grid;gap:20px;width:100%}
+.fields{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+.field{display:grid;gap:8px;min-width:0}
+.field label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.field input{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:1.5px solid #2a3547;background:#0a0e15;color:var(--text);font:600 18px var(--body)}
+.field input:focus{border-color:var(--blue);outline:none}
+.idout{border-radius:18px;padding:22px 18px;background:#080b11;border:1.5px dashed #33415c;text-align:center;overflow-wrap:anywhere}
+.idout code{font-family:var(--mono);font-size:clamp(20px,5.2vw,34px);letter-spacing:.04em}
+.idout code .c{color:var(--blue)}.idout code .n{color:var(--text)}.idout code .k{color:var(--violet)}
+.legend{display:flex;justify-content:center;gap:18px;margin-top:12px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.idnote{font-size:15px;color:var(--muted)}
+.idbox .btn{justify-self:start}
+
+/* facts */
+.facts{display:grid;gap:14px}
+@media(min-width:700px){.facts{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.facts{grid-template-columns:repeat(4,1fr)}}
+.fact{padding:26px 22px;border-radius:22px;background:var(--surface);border:1.5px solid var(--line);display:grid;gap:10px;align-content:start}
+.fact h3{font-size:24px;font-weight:800}
+.fact p{color:var(--muted);font-size:16px}
+.fact .tag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.fact.soon{border-style:dashed;border-color:#4a56d6;background:transparent}
+.fact.soon .tag{color:#aab4ff}
+
+/* video */
+.video{display:grid;gap:28px;justify-items:center}
+.vwrap{width:min(420px,100%);border-radius:28px;overflow:hidden;border:1.5px solid #34405a;box-shadow:0 40px 90px rgba(0,0,0,.6);background:#000}
+.vwrap video{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+
+/* cta */
+.final{margin-top:96px;padding:56px 24px;border-radius:36px;text-align:center;display:grid;gap:22px;justify-items:center;
+  background:radial-gradient(120% 140% at 50% 0%,rgba(43,155,255,.25),rgba(122,107,255,.12) 55%,rgba(14,19,28,1)),var(--surface);border:1.5px solid #2e3a52}
+.final h2{font-size:clamp(40px,8.5vw,84px);font-weight:800}
+.final p{color:#c3cee0;max-width:28em}
+.wa{background:#25d366;color:#04140a;min-height:60px;padding:0 34px;font-size:19px}
+.wa:hover{box-shadow:0 12px 40px rgba(37,211,102,.4)}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-family:var(--mono);font-size:16px;color:var(--muted)}
+.numrow button{min-height:40px;padding:0 16px;border-radius:999px;border:1.5px solid #34405a;background:transparent;color:var(--text);font:600 14px var(--body);cursor:pointer}
+footer{padding-block:56px 24px;display:grid;gap:18px;justify-items:center;text-align:center;color:var(--muted);font-size:15px}
+footer img.tv{width:220px;mix-blend-mode:screen}
+
+/* sticky bar (phones) */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,rgba(5,7,10,0),rgba(5,7,10,.94) 40%);display:flex;justify-content:center}
+.bar .btn{width:100%;max-width:420px;box-shadow:0 10px 36px rgba(0,0,0,.6)}
+@media(min-width:861px){.bar{display:none}body{padding-block:0 40px}}
+
+/* entrance: starts visible */
+.rise{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:.001;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.track,.float,.rise{animation:none}.phone,.screen img{transition:none}html{scroll-behavior:auto}}
+</style>
+
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+
+<header class="wrap">
+  <nav>
+    <a class="brand" href="#top"><img src="tedverse-icon.png" alt="">SchoolUp</a>
+    <a class="btn sm" href="#demo" data-wa>Request a demo</a>
+  </nav>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <div class="rise">
+      <p class="label" style="margin-bottom:18px">Made for Nigerian schools</p>
+      <h1>Your whole school.<br><span class="g">One app.</span></h1>
+      <p class="sub">Homework, class chats your teachers can read, and a timetable that builds itself. On every student's phone, under your school's name and colours.</p>
+      <div class="cta-row">
+        <a class="btn" href="#demo" data-wa>Get a free demo</a>
+        <a class="btn ghost" href="./">Try the live demo</a>
+      </div>
+      <div class="pills">
+        <span class="pill">Assignments &amp; files</span>
+        <span class="pill">Teacher-visible class chat</span>
+        <span class="pill">Auto timetable</span>
+        <span class="pill dash">AI study helper · coming soon</span>
+      </div>
+    </div>
+
+    <div class="stage" aria-label="SchoolUp screens">
+      <div class="phone" id="heroPhone">
+        <div class="screen" id="heroScreen">
+          <img src="home.jpg" alt="Student home with assignments and today's classes" class="on">
+          <img src="timetable.jpg" alt="Timetable with periods, short break, long break and recess">
+          <img src="chat.jpg" alt="Class chat where a teacher replies to a student">
+        </div>
+        <div class="dots" id="heroDots"></div>
+      </div>
+      <div class="float f1"><i></i>Never two classes for one teacher</div>
+      <div class="float f2"><i></i>School day built in</div>
+      <div class="float f3"><i></i>Teachers can read every message</div>
+    </div>
+  </div>
+</main>
+
+<div class="ticker" aria-label="A Nigerian school day: periods one to three, short break, periods four and five, long break, periods six and seven, recess">
+  <div class="track" id="track"></div>
+</div>
+
+<main class="wrap">
+  <section>
+    <div class="head">
+      <p class="label">Why schools switch</p>
+      <h2>Stop running school through <span class="g">five WhatsApp groups.</span></h2>
+    </div>
+
+    <div class="row">
+      <div class="copy">
+        <p class="label">Timetable</p>
+        <h3>It builds itself.</h3>
+        <p class="lead">Tap "Generate for me". SchoolUp reads your teachers, their subjects and their classes, then lays out the week. Change any slot by hand afterwards.</p>
+        <ul class="ticks">
+          <li>Follows the Nigerian school day: P1 to P3, short break, P4 and P5, long break, P6 and P7, recess</li>
+          <li>Never puts a teacher in two classes at once</li>
+          <li>Set your own start time and period length</li>
+        </ul>
+      </div>
+      <div class="showcase"><div class="phone tilt-r"><div class="screen"><img class="on" src="timetable.jpg" alt="Generated timetable for a class"></div></div></div>
+    </div>
+
+    <div class="row flip">
+      <div class="copy">
+        <p class="label">Class chat</p>
+        <h3>Chat that stays safe.</h3>
+        <p class="lead">Each class gets its own chat. Teachers can read every message, so students keep it kind and about school, and parents can trust it.</p>
+        <ul class="ticks">
+          <li>One chat per class, with teachers marked clearly</li>
+          <li>Post assignments and notices in the same place</li>
+          <li>Students ask questions where the teacher already is</li>
+        </ul>
+      </div>
+      <div class="showcase"><div class="phone tilt-l"><div class="screen"><img class="on" src="chat.jpg" alt="Class chat with a teacher reply"></div></div></div>
+    </div>
+
+    <div class="row">
+      <div class="copy">
+        <p class="label">Student IDs</p>
+        <h3>An ID a child can remember.</h3>
+        <p class="lead">Register a student and SchoolUp makes the ID for you: class, first name, then a short code. Try it with any name.</p>
+      </div>
+      <div class="idbox">
+        <div class="fields">
+          <div class="field"><label for="idClass">Class</label><input id="idClass" value="JSS1D" maxlength="8" autocomplete="off" spellcheck="false"></div>
+          <div class="field"><label for="idName">First name</label><input id="idName" value="Victor" maxlength="16" autocomplete="off" spellcheck="false"></div>
+        </div>
+        <div>
+          <div class="idout" aria-live="polite"><code id="idOut"></code></div>
+          <div class="legend"><span><b style="color:var(--blue)">■</b> class</span><span><b style="color:var(--text)">■</b> first name</span><span><b style="color:var(--violet)">■</b> short code</span></div>
+        </div>
+        <p class="idnote">The student signs in with this ID. Sample only; real IDs are made inside your school's own SchoolUp.</p>
+        <button class="btn ghost sm" id="shuffle" type="button">New code</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="label">Built for how schools work</p>
+      <h2>Yours, not ours.</h2>
+    </div>
+    <div class="facts">
+      <div class="fact"><span class="tag">White-label</span><h3>Your name and colours</h3><p>Students see your school, not ours. Set up in minutes.</p></div>
+      <div class="fact"><span class="tag">Three roles</span><h3>Students, teachers, admin</h3><p>Everyone sees only what they should. Each school's data stays separate.</p></div>
+      <div class="fact"><span class="tag">Phone first</span><h3>Works on any phone</h3><p>Open it in the browser, no heavy download. Add it to the home screen.</p></div>
+      <div class="fact soon"><span class="tag">Coming soon</span><h3>AI study helper</h3><p>Explains topics with examples and notes. It never hands out the answers.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="video">
+      <div class="head" style="text-align:center;justify-items:center;margin-bottom:0">
+        <p class="label">20 seconds</p>
+        <h2>See it move.</h2>
+      </div>
+      <div class="vwrap"><video controls playsinline preload="metadata" poster="poster.jpg"><source src="promo.mp4" type="video/mp4"></video></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="final">
+      <p class="label">Free demo</p>
+      <h2>Want it for <span class="g">your school?</span></h2>
+      <p>Message us on WhatsApp. We will show you SchoolUp in 5 minutes and set up a test class for your teachers.</p>
+      <a class="btn wa" id="waMain" href="#" target="_blank" rel="noopener">Chat on WhatsApp</a>
+      <div class="numrow" id="numRow" hidden><span id="numTxt"></span><button type="button" id="copyNum">Copy number</button></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <img class="tv" src="tedverse-logo.png" alt="TedVerse, building worlds that work">
+  <p>SchoolUp is built by TedVerse. Screens on this page use sample data.</p>
+</footer>
+
+<div class="bar"><a class="btn" href="#demo" data-wa>Get a free demo</a></div>
+
+<script>
+/* ===== SET THIS ===== */
+const WA_NUMBER = "2349153095579";   // your WhatsApp number, digits only, with country code e.g. 2348012345678
+const DEMO_LINK = "./";               // where the live app is
+/* ==================== */
+(function(){
+  var set=/^\d{8,15}$/.test(WA_NUMBER);
+  var msg=encodeURIComponent("Hello, I'd like a demo of SchoolUp for my school.");
+  var href=set?("https://wa.me/"+WA_NUMBER+"?text="+msg):("https://wa.me/?text="+msg);
+  var wa=document.getElementById('waMain'); wa.href=href;
+  document.querySelectorAll('[data-wa]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();document.getElementById('demo').scrollIntoView({behavior:'smooth'})})});
+  if(set){
+    var pretty="+"+WA_NUMBER.replace(/^(\d{3})(\d{3})(\d{3})(\d+)$/,"$1 $2 $3 $4");
+    document.getElementById('numRow').hidden=false; document.getElementById('numTxt').textContent=pretty;
+    document.getElementById('copyNum').addEventListener('click',function(){
+      var b=this; function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy number'},1600)}
+      try{navigator.clipboard.writeText("+"+WA_NUMBER).then(ok,function(){})}catch(e){}
+    });
+  }
+  document.querySelectorAll('a.ghost[href="./"]').forEach(function(a){a.href=DEMO_LINK});
+
+  /* ticker: the Nigerian school day */
+  var items=[['b','P1'],['b','P2'],['b','P3'],['em','Short break'],['b','P4'],['b','P5'],['em','Long break'],['b','P6'],['b','P7'],['em','Recess']];
+  var one=items.map(function(i){return '<span><'+i[0]+'>'+i[1]+'</'+i[0]+'><u>/</u></span>'}).join('');
+  document.getElementById('track').innerHTML=one+one+one+one;
+
+  /* hero phone: cycle screens */
+  var imgs=[].slice.call(document.querySelectorAll('#heroScreen img')), dots=document.getElementById('heroDots'), cur=0, timer;
+  imgs.forEach(function(_,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Show screen '+(i+1));b.onclick=function(){go(i,true)};dots.appendChild(b)});
+  function go(i,user){cur=i;imgs.forEach(function(m,k){m.classList.toggle('on',k===i)});[].forEach.call(dots.children,function(d,k){d.setAttribute('aria-current',k===i)});if(user){clearInterval(timer);timer=setInterval(next,3600)}}
+  function next(){go((cur+1)%imgs.length)}
+  go(0); timer=setInterval(next,3600);
+
+  /* hero phone: follow the pointer */
+  var ph=document.getElementById('heroPhone'), st=ph.parentNode, reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){
+    st.addEventListener('pointermove',function(e){var r=st.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;ph.style.transform='rotateY('+(x*16)+'deg) rotateX('+(-y*10)+'deg)'});
+    st.addEventListener('pointerleave',function(){ph.style.transform=''});
+  }
+
+  /* student ID maker */
+  var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', code='';
+  function mk(){code='';for(var i=0;i<5;i++)code+=A[Math.floor(Math.random()*A.length)]}
+  function clean(s){return s.toUpperCase().replace(/[^A-Z0-9]/g,'')}
+  function show(){
+    var c=clean(document.getElementById('idClass').value)||'CLASS', n=clean(document.getElementById('idName').value)||'NAME';
+    document.getElementById('idOut').innerHTML='<span class="c">'+c+'</span>-<span class="n">'+n+'</span>-<span class="k">'+code+'</span>';
+  }
+  mk(); show();
+  ['idClass','idName'].forEach(function(id){document.getElementById(id).addEventListener('input',show)});
+  document.getElementById('shuffle').addEventListener('click',function(){mk();show()});
+})();
+</script>
+</body>
+</html>
